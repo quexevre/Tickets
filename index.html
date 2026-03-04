@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sistema Oficial - Timpulso</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #111;
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 10px; /* Reducido para móviles */
+            overflow-x: hidden; /* Evita rebote lateral del cuerpo */
+        }
+
+        h2 { color: #2ecc71; font-size: 1.5rem; }
+
+        .selector-tipo {
+            background: #333;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #555;
+            font-size: 16px;
+            width: 90%; /* Responsive */
+            max-width: 400px;
+        }
+
+        /* CONTENEDOR PARA DESPLAZAMIENTO LATERAL */
+        .mapa-scroll {
+            width: 100%;
+            overflow-x: auto; /* Permite deslizar el mapa si no cabe */
+            padding-bottom: 20px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* GRID BASE MAPA (Ajustado) */
+        .grid-base {
+            display: grid;
+            grid-template-columns: 30px repeat(7, 35px) 50px repeat(7, 35px); /* Columnas más delgadas */
+            justify-content: center;
+            gap: 3px;
+            min-width: 580px; /* Mantiene la forma del teatro */
+        }
+
+        .escenario-container { margin: 20px 0 10px 0; }
+
+        .escenario {
+            grid-column: 2 / 17;
+            background: #444;
+            padding: 10px 0;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            letter-spacing: 2px;
+            border-bottom: 3px solid #2ecc71;
+        }
+
+        .fila { margin: 4px 0; align-items: center; }
+        .letra { font-weight: bold; text-align: center; color: #888; font-size: 12px; }
+
+        /* ASIENTOS MÁS PEQUEÑOS PARA MÓVIL */
+        .asiento {
+            width: 32px;
+            height: 32px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .vip { background: gold; color: black; }
+        .seleccionado { background: #ff4757 !important; color: white !important; }
+        .ocupado { background: #333 !important; color: #555 !important; cursor: not-allowed; }
+
+        /* PANEL GENERAL RESPONSIVE */
+        .general-panel {
+            width: 90%;
+            max-width: 280px;
+            background: #2ecc71;
+            margin: 20px auto;
+            padding: 15px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            color: black;
+        }
+
+        .btn-confirmar {
+            width: 90%;
+            max-width: 350px;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            margin: 20px 0;
+        }
+
+        /* MODAL RESPONSIVE */
+        .modal-content {
+            width: 85% !important;
+            margin: 20% auto !important;
+        }
+
+        /* MEDIA QUERIES PARA CELULARES PEQUEÑOS */
+        @media (max-width: 480px) {
+            h2 { font-size: 1.2rem; }
+            .asiento { width: 30px; height: 30px; font-size: 10px; }
+            .grid-base { grid-template-columns: 25px repeat(7, 30px) 40px repeat(7, 30px); min-width: 500px; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Venta de Entradas - Timpulso</h2>
+
+    <select id="tipoEntrada" class="selector-tipo" onchange="cambiarTipo()">
+        <option value="VIP">Zona VIP (Numerada)</option>
+        <option value="GENERAL">Zona General</option>
+    </select>
+
+    <div id="contenedorVIP">
+        <div class="mapa-scroll">
+            <div class="escenario-container grid-base">
+                <div></div>
+                <div class="escenario">ESCENARIO</div>
+            </div>
+            <div id="mapaVIP">Cargando...</div>
+        </div>
+        <p style="font-size: 12px; color: #888;">← Desliza para ver todos los asientos →</p>
+    </div>
+
+    <div id="contenedorGeneral" style="display:none;">
+        <div class="general-panel">
+            <button class="btn-qty" onclick="modificarGeneral(-1)">−</button>
+            <span id="contadorGeneral">0</span>
+            <button class="btn-qty" onclick="modificarGeneral(1)">+</button>
+        </div>
+    </div>
+
+    <button id="btnFinalizar" class="btn-confirmar" onclick="abrirRegistro()">Confirmar y Descargar</button>
+
+    <div id="modalRegistro" class="modal">
+        <div class="modal-content">
+            <h3 style="color:#2ecc71; text-align:center;">Datos del Cliente</h3>
+            <input type="text" id="cNombre" placeholder="Apellidos y Nombres">
+            <input type="text" id="cDNI" placeholder="DNI" inputmode="numeric">
+            <input type="text" id="cCel" placeholder="Celular" inputmode="tel">
+            <button class="btn-reg" onclick="validarYProcesar()">Finalizar Venta</button>
+            <button class="btn-reg" style="background:#555" onclick="cerrarRegistro()">Cancelar</button>
+        </div>
+    </div>
+
+    <script>
+        // MANTÉN AQUÍ TODO TU SCRIPT ANTERIOR (URL_APP, funciones, etc.)
+        // Solo asegúrate de copiar las funciones cargarDatos, crearMapa, etc.
+        // que ya teníamos funcionando.
+        
+        const URL_APP = "https://script.google.com/macros/s/AKfycbyJBKGo3-F4JmLSsJ-XIpHkeh5LDxyOtYAZjHxXIybWM1DH3tIUm6lzbzXchkacKAns/exec";
+        const filasVIP = ["A", "B", "C", "D", "E", "F", "G"];
+        let pedido = { vip: [], general: 0 };
+        let asientosOcupados = [];
+        let correlativo = localStorage.getItem("correlativoGlobal") ? parseInt(localStorage.getItem("correlativoGlobal")) : 1;
+
+        async function cargarDatos() {
+            try {
+                const res = await fetch(URL_APP);
+                asientosOcupados = await res.json();
+                crearMapa();
+            } catch (e) {
+                console.error("Error", e);
+                crearMapa(); 
+            }
+        }
+
+        function crearMapa() {
+            const mapa = document.getElementById("mapaVIP");
+            mapa.innerHTML = "";
+            filasVIP.forEach(fila => {
+                const filaDiv = document.createElement("div");
+                filaDiv.className = "fila grid-base";
+                const letra = document.createElement("div");
+                letra.className = "letra";
+                letra.innerText = fila;
+                filaDiv.appendChild(letra);
+                let cantidad = (fila === "A" || fila === "B" || fila === "C") ? 13 : 14;
+                if (cantidad === 13) filaDiv.appendChild(document.createElement("div"));
+                for (let i = cantidad; i >= 1; i--) {
+                    const idAsiento = `${fila}-${i}`;
+                    const asiento = document.createElement("div");
+                    const estaOcupado = asientosOcupados.includes(idAsiento);
+                    asiento.className = "asiento vip" + (estaOcupado ? " ocupado" : "");
+                    asiento.innerText = i;
+                    if (!estaOcupado) asiento.onclick = () => toggleAsiento(idAsiento, asiento);
+                    filaDiv.appendChild(asiento);
+                }
+                mapa.appendChild(filaDiv);
+            });
+        }
+
+        function toggleAsiento(id, elemento) {
+            const index = pedido.vip.indexOf(id);
+            if (index > -1) {
+                pedido.vip.splice(index, 1);
+                elemento.classList.remove("seleccionado");
+            } else {
+                pedido.vip.push(id);
+                elemento.classList.add("seleccionado");
+            }
+        }
+
+        function modificarGeneral(val) {
+            pedido.general = Math.max(0, pedido.general + val);
+            document.getElementById("contadorGeneral").innerText = pedido.general;
+        }
+
+        function cambiarTipo() {
+            const t = document.getElementById("tipoEntrada").value;
+            document.getElementById("contenedorVIP").style.display = t === "VIP" ? "block" : "none";
+            document.getElementById("contenedorGeneral").style.display = t === "GENERAL" ? "block" : "none";
+        }
+
+        function abrirRegistro() {
+            if (pedido.vip.length + pedido.general === 0) return alert("Selecciona entradas");
+            document.getElementById("modalRegistro").style.display = "block";
+        }
+
+        function cerrarRegistro() { document.getElementById("modalRegistro").style.display = "none"; }
+
+        async function validarYProcesar() {
+            const nombre = document.getElementById("cNombre").value;
+            const dni = document.getElementById("cDNI").value;
+            const cel = document.getElementById("cCel").value;
+            if (!nombre || !dni || !cel) return alert("Completa los datos");
+            const btn = document.querySelector(".btn-reg");
+            btn.disabled = true;
+            btn.innerText = "⏳ Guardando...";
+            let tipoVentaFinal = (pedido.vip.length > 0 && pedido.general > 0) ? "MIXTA" : (pedido.vip.length > 0 ? "VIP" : "GENERAL");
+            let listaAsientos = [...pedido.vip];
+            if (pedido.general > 0) listaAsientos.push("GENERAL (" + pedido.general + ")");
+            const datosVenta = {
+                nroVenta: Date.now().toString().slice(-6), 
+                nombre: nombre, dni: dni, celular: cel,
+                asientos: listaAsientos, tipo: tipoVentaFinal 
+            };
+            try {
+                await fetch(URL_APP, { method: "POST", mode: "no-cors", body: JSON.stringify(datosVenta) });
+                for (let a of pedido.vip) {
+                    await generarTicket("vip.jpg", String(correlativo).padStart(5, "0"), a);
+                    correlativo++;
+                }
+                for (let i = 0; i < pedido.general; i++) {
+                    await generarTicket("general.jpg", String(correlativo).padStart(5, "0"), "GENERAL");
+                    correlativo++;
+                }
+                localStorage.setItem("correlativoGlobal", correlativo);
+                alert("Éxito!");
+                location.reload();
+            } catch (e) { alert("Error"); btn.disabled = false; }
+        }
+
+        function generarTicket(ruta, num, asiento) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.src = ruta;
+                img.onload = () => {
+                    const canvas = document.createElement("canvas");
+                    canvas.width = img.width; canvas.height = img.height;
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0);
+                    ctx.fillStyle = "white";
+                    ctx.font = "bold 42px Arial";
+                    ctx.textAlign = "left";
+                    ctx.fillText(num, img.width * 0.140, img.height * 0.115);
+                    ctx.fillText(num, img.width * 0.865, img.height * 0.115);
+                    ctx.textAlign = "center";
+                    if (asiento === "GENERAL") {
+                        ctx.font = "bold 55px Arial";
+                        ctx.fillText("GENERAL", img.width * 0.872, img.height * 0.285);
+                    } else {
+                        ctx.font = "bold 45px Arial";
+                        ctx.fillText("ASIENTO: " + asiento, img.width * 0.872, img.height * 0.285);
+                    }
+                    const link = document.createElement("a");
+                    link.download = `Ticket_${num}.png`;
+                    link.href = canvas.toDataURL();
+                    link.click();
+                    setTimeout(resolve, 600);
+                };
+            });
+        }
+
+        cargarDatos();
+    </script>
+</body>
+</html>
