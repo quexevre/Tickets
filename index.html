@@ -1,178 +1,37 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sistema Oficial - Timpulso</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: #111;
-            color: white;
-            text-align: center;
-            margin: 0;
-            padding: 20px;
-        }
-
-        h2 { color: #2ecc71; }
-
-        /* SELECTOR */
-        .selector-tipo {
-            background: #333;
-            color: white;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #555;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        /* GRID BASE MAPA */
-        .grid-base {
-            display: grid;
-            grid-template-columns: 40px repeat(7, 40px) 80px repeat(7, 40px);
-            justify-content: center;
-            gap: 4px;
-        }
-
-        .escenario-container { margin: 30px 0 15px 0; }
-
-        .escenario {
-            grid-column: 2 / 17;
-            background: #444;
-            padding: 15px 0;
-            border-radius: 10px;
-            font-weight: bold;
-            letter-spacing: 4px;
-            border-bottom: 3px solid #2ecc71;
-        }
-
-        .fila { margin: 6px 0; align-items: center; }
-        .letra { font-weight: bold; text-align: center; color: #888; }
-
-        /* ASIENTOS */
-        .asiento {
-            width: 35px;
-            height: 35px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #111; color: white; text-align: center; margin: 0; padding: 10px; overflow-x: hidden; }
+        h2 { color: #2ecc71; font-size: 1.5rem; }
+        .selector-tipo { background: #333; color: white; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #555; font-size: 16px; width: 90%; max-width: 400px; cursor: pointer; }
+        .mapa-scroll { width: 100%; overflow-x: auto; padding-bottom: 20px; -webkit-overflow-scrolling: touch; }
+        .grid-base { display: grid; grid-template-columns: 30px repeat(7, 35px) 50px repeat(7, 35px); justify-content: center; gap: 3px; min-width: 580px; }
+        .escenario-container { margin: 20px 0 10px 0; }
+        .escenario { grid-column: 2 / 17; background: #444; padding: 10px 0; border-radius: 8px; font-weight: bold; font-size: 14px; letter-spacing: 2px; border-bottom: 3px solid #2ecc71; }
+        .fila { margin: 4px 0; align-items: center; }
+        .letra { font-weight: bold; text-align: center; color: #888; font-size: 12px; }
+        .asiento { width: 32px; height: 32px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; cursor: pointer; }
         .vip { background: gold; color: black; }
-        .vip:hover { transform: scale(1.1); }
-        
-        .seleccionado { 
-            background: #ff4757 !important; 
-            color: white !important; 
-            box-shadow: 0 0 10px #ff4757;
-        }
-
-        .ocupado {
-            background: #444 !important;
-            color: #777 !important;
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-
-        /* PANEL GENERAL */
-        .general-panel {
-            width: 280px;
-            background: #2ecc71;
-            margin: 30px auto;
-            padding: 15px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-around;
-            font-weight: bold;
-            font-size: 22px;
-            color: black;
-        }
-
-        .btn-qty {
-            width: 45px;
-            height: 45px;
-            font-size: 24px;
-            cursor: pointer;
-            border: none;
-            border-radius: 50%;
-            background: white;
-        }
-
-        .btn-confirmar {
-            margin: 30px;
-            padding: 15px 40px;
-            font-size: 18px;
-            font-weight: bold;
-            background: #2ecc71;
-            color: white;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .btn-confirmar:hover { background: #27ae60; transform: translateY(-3px); }
-        .btn-confirmar:disabled { background: #555; cursor: not-allowed; }
-
-        /* MODAL REGISTRO */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-        }
-
-        .modal-content {
-            background: #222;
-            margin: 10% auto;
-            padding: 25px;
-            border: 1px solid #2ecc71;
-            width: 320px;
-            border-radius: 15px;
-            text-align: left;
-        }
-
-        .modal-content input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-            border: 1px solid #444;
-            background: #333;
-            color: white;
-            box-sizing: border-box;
-        }
-
-        .btn-reg {
-            width: 100%;
-            padding: 12px;
-            background: #2ecc71;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-        }
+        .seleccionado { background: #ff4757 !important; color: white !important; box-shadow: 0 0 10px #ff4757; }
+        .ocupado { background: #333 !important; color: #555 !important; cursor: not-allowed; }
+        .general-panel { width: 90%; max-width: 280px; background: #2ecc71; margin: 20px auto; padding: 15px; border-radius: 12px; display: flex; align-items: center; justify-content: space-around; color: black; font-weight: bold; font-size: 22px; }
+        .btn-qty { width: 45px; height: 45px; font-size: 24px; cursor: pointer; border: none; border-radius: 50%; background: white; }
+        .btn-confirmar { width: 90%; max-width: 350px; padding: 15px; font-size: 18px; font-weight: bold; background: #2ecc71; color: white; border: none; border-radius: 50px; margin: 20px 0; cursor: pointer; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); }
+        .modal-content { background: #222; margin: 15% auto; padding: 25px; border: 1px solid #2ecc71; width: 85%; max-width: 320px; border-radius: 15px; text-align: left; }
+        .modal-content input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 5px; border: 1px solid #444; background: #333; color: white; box-sizing: border-box; }
+        .btn-reg { width: 100%; padding: 12px; background: #2ecc71; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .seccion-recuperar { margin: 50px auto 30px auto; padding: 20px; border-top: 1px solid #333; background: #1a1a1a; max-width: 500px; border-radius: 15px; }
+        .input-busqueda { padding: 10px; border-radius: 5px; border: 1px solid #2ecc71; background: #000; color: white; width: 180px; text-align: center; }
     </style>
 </head>
-
 <body>
 
-    <h2>Sistema de Ventas - Alma para Conquistarte</h2>
+    <h2>Venta de Entradas - Timpulso</h2>
 
     <select id="tipoEntrada" class="selector-tipo" onchange="cambiarTipo()">
         <option value="VIP">Zona VIP (Numerada)</option>
@@ -180,11 +39,14 @@
     </select>
 
     <div id="contenedorVIP">
-        <div class="escenario-container grid-base">
-            <div></div>
-            <div class="escenario">ESCENARIO</div>
+        <div class="mapa-scroll">
+            <div class="escenario-container grid-base">
+                <div></div>
+                <div class="escenario">ESCENARIO</div>
+            </div>
+            <div id="mapaVIP">Cargando mapa...</div>
         </div>
-        <div id="mapaVIP">Cargando asientos desde la nube...</div>
+        <p style="font-size: 11px; color: #666;">← Desliza para ver más asientos →</p>
     </div>
 
     <div id="contenedorGeneral" style="display:none;">
@@ -199,19 +61,28 @@
 
     <div id="modalRegistro" class="modal">
         <div class="modal-content">
-            <h3 style="color:#2ecc71; text-align:center;">Datos del Cliente</h3>
-            <input type="text" id="cNombre" placeholder="Apellidos y Nombres">
-            <input type="text" id="cDNI" placeholder="DNI">
-            <input type="text" id="cCel" placeholder="Celular">
-            <button class="btn-reg" onclick="validarYProcesar()">Finalizar Venta</button>
-            <button class="btn-reg" style="background:#555" onclick="cerrarRegistro()">Cancelar</button>
+            <h3 style="color:#2ecc71; text-align:center; margin-top:0;">Registro de Venta</h3>
+            <input type="text" id="cNombre" placeholder="Nombre del Cliente">
+            <input type="text" id="cDNI" placeholder="DNI" inputmode="numeric">
+            <input type="text" id="cCel" placeholder="Celular" inputmode="tel">
+            <button id="btnEjecutar" class="btn-reg" onclick="validarYProcesar()">Finalizar Venta</button>
+            <button class="btn-reg" style="background:#555; margin-top:8px;" onclick="cerrarRegistro()">Cancelar</button>
         </div>
     </div>
 
-    <script>
-        // URL DE TU PROPIA APLICACIÓN DE GOOGLE
-        const URL_APP = "https://script.google.com/macros/s/AKfycbyJBKGo3-F4JmLSsJ-XIpHkeh5LDxyOtYAZjHxXIybWM1DH3tIUm6lzbzXchkacKAns/exec";
+    <div class="seccion-recuperar">
+        <h3 style="color:#2ecc71; margin-top:0;">🔍 Recuperar Tickets</h3>
+        <p style="font-size: 12px; color:#aaa;">Busca por DNI para volver a descargar:</p>
+        <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
+            <input type="text" id="dniBusqueda" class="input-busqueda" placeholder="DNI del cliente">
+            <button onclick="buscarYReimprimir()" style="padding:10px 15px; background:#2ecc71; color:white; border:none; border-radius:5px; font-weight:bold; cursor:pointer;">Buscar</button>
+        </div>
+        <div id="resultadoBusqueda" style="margin-top: 15px;"></div>
+    </div>
 
+    <script>
+        const URL_APP = "https://script.google.com/macros/s/AKfycbzO_-ll5SSczfl0GczbqRykfN6kgvYeSosiZqIFUrUHm9S2Fda6hD6cnk8a-Ug-fVAY/exec"; // REEMPLAZA ESTO
+        
         const filasVIP = ["A", "B", "C", "D", "E", "F", "G"];
         let pedido = { vip: [], general: 0 };
         let asientosOcupados = [];
@@ -222,57 +93,41 @@
                 const res = await fetch(URL_APP);
                 asientosOcupados = await res.json();
                 crearMapa();
-            } catch (e) {
-                console.error("Error cargando datos", e);
-                crearMapa(); 
-            }
+            } catch (e) { console.error("Error cargando mapa", e); crearMapa(); }
         }
 
         function crearMapa() {
             const mapa = document.getElementById("mapaVIP");
             mapa.innerHTML = "";
-
             filasVIP.forEach(fila => {
                 const filaDiv = document.createElement("div");
                 filaDiv.className = "fila grid-base";
                 const letra = document.createElement("div");
-                letra.className = "letra";
-                letra.innerText = fila;
+                letra.className = "letra"; letra.innerText = fila;
                 filaDiv.appendChild(letra);
-
                 let cantidad = (fila === "A" || fila === "B" || fila === "C") ? 13 : 14;
                 if (cantidad === 13) filaDiv.appendChild(document.createElement("div"));
-
                 for (let i = cantidad; i >= 1; i--) {
-                    const idAsiento = `${fila}-${i}`;
+                    const id = `${fila}-${i}`;
                     const asiento = document.createElement("div");
-                    const estaOcupado = asientosOcupados.includes(idAsiento);
-                    
+                    const estaOcupado = asientosOcupados.includes(id);
                     asiento.className = "asiento vip" + (estaOcupado ? " ocupado" : "");
                     asiento.innerText = i;
-                    
-                    if (!estaOcupado) {
-                        asiento.onclick = () => toggleAsiento(idAsiento, asiento);
-                    }
+                    if (!estaOcupado) asiento.onclick = () => toggleAsiento(id, asiento);
                     filaDiv.appendChild(asiento);
                 }
                 mapa.appendChild(filaDiv);
             });
         }
 
-        function toggleAsiento(id, elemento) {
-            const index = pedido.vip.indexOf(id);
-            if (index > -1) {
-                pedido.vip.splice(index, 1);
-                elemento.classList.remove("seleccionado");
-            } else {
-                pedido.vip.push(id);
-                elemento.classList.add("seleccionado");
-            }
+        function toggleAsiento(id, el) {
+            const idx = pedido.vip.indexOf(id);
+            if (idx > -1) { pedido.vip.splice(idx, 1); el.classList.remove("seleccionado"); }
+            else { pedido.vip.push(id); el.classList.add("seleccionado"); }
         }
 
-        function modificarGeneral(val) {
-            pedido.general = Math.max(0, pedido.general + val);
+        function modificarGeneral(v) {
+            pedido.general = Math.max(0, pedido.general + v);
             document.getElementById("contadorGeneral").innerText = pedido.general;
         }
 
@@ -283,74 +138,94 @@
         }
 
         function abrirRegistro() {
-            if (pedido.vip.length + pedido.general === 0) return alert("Selecciona al menos una entrada");
+            if (pedido.vip.length + pedido.general === 0) return alert("Selecciona entradas");
             document.getElementById("modalRegistro").style.display = "block";
         }
 
         function cerrarRegistro() { document.getElementById("modalRegistro").style.display = "none"; }
 
-        // --- PROCESAR VENTA (CORRECCIÓN MIXTA) ---
         async function validarYProcesar() {
             const nombre = document.getElementById("cNombre").value;
             const dni = document.getElementById("cDNI").value;
             const cel = document.getElementById("cCel").value;
+            if (!nombre || !dni || !cel) return alert("Faltan datos");
 
-            if (!nombre || !dni || !cel) return alert("Por favor, completa todos los datos.");
+            const btn = document.getElementById("btnEjecutar");
+            btn.disabled = true; btn.innerText = "⏳ Guardando...";
 
-            const btn = document.querySelector(".btn-reg");
-            btn.disabled = true;
-            btn.innerText = "⏳ Guardando en Nube...";
-
-            // Lógica para detectar tipo MIXTA
-            let tipoVentaFinal = "";
-            if (pedido.vip.length > 0 && pedido.general > 0) {
-                tipoVentaFinal = "MIXTA";
-            } else if (pedido.vip.length > 0) {
-                tipoVentaFinal = "VIP";
-            } else {
-                tipoVentaFinal = "GENERAL";
-            }
-
-            // Preparar lista unificada de asientos para el Excel
+            let tipoFinal = (pedido.vip.length > 0 && pedido.general > 0) ? "MIXTA" : (pedido.vip.length > 0 ? "VIP" : "GENERAL");
             let listaAsientos = [...pedido.vip];
             if (pedido.general > 0) listaAsientos.push("GENERAL (" + pedido.general + ")");
 
-            const datosVenta = {
-                nroVenta: Date.now().toString().slice(-6), 
-                nombre: nombre,
-                dni: dni,
-                celular: cel,
-                asientos: listaAsientos,
-                tipo: tipoVentaFinal 
+            const datos = {
+                nroVenta: Date.now().toString().slice(-6),
+                nombre, dni, celular: cel,
+                asientos: listaAsientos, 
+                tipo: tipoFinal,
+                correlativo: correlativo // Guardamos el número actual en Sheets
             };
 
             try {
-                // 1. Guardar en Google Sheets
-                await fetch(URL_APP, {
-                    method: "POST",
-                    mode: "no-cors",
-                    body: JSON.stringify(datosVenta)
-                });
+                await fetch(URL_APP, { method: "POST", mode: "no-cors", body: JSON.stringify(datos) });
 
-                // 2. Generar Tickets VIP
+                // Descarga VIP
                 for (let a of pedido.vip) {
                     await generarTicket("vip.jpg", String(correlativo).padStart(5, "0"), a);
                     correlativo++;
                 }
-                
-                // 3. Generar Tickets General
+                // Descarga General
                 for (let i = 0; i < pedido.general; i++) {
                     await generarTicket("general.jpg", String(correlativo).padStart(5, "0"), "GENERAL");
                     correlativo++;
                 }
-
+                
                 localStorage.setItem("correlativoGlobal", correlativo);
-                alert("✅ Venta " + tipoVentaFinal + " registrada. Descargando tickets...");
+                alert("¡Venta registrada con éxito!");
                 location.reload();
-            } catch (e) {
-                alert("Error: " + e);
-                btn.disabled = false;
+            } catch (e) { 
+                alert("Error al registrar: " + e.message); 
+                btn.disabled = false; btn.innerText = "Finalizar Venta";
             }
+        }
+
+        async function buscarYReimprimir() {
+            const dni = document.getElementById("dniBusqueda").value;
+            const resDiv = document.getElementById("resultadoBusqueda");
+            if (!dni) return alert("Ingresa DNI");
+            resDiv.innerHTML = "⏳ Buscando...";
+            try {
+                const res = await fetch(`${URL_APP}?dni=${dni}`);
+                const ventas = await res.json();
+                if (ventas.length === 0) { resDiv.innerHTML = "❌ Sin compras registradas."; return; }
+                
+                resDiv.innerHTML = `<h4>Compras de: ${ventas[0].nombre}</h4>`;
+                ventas.forEach((v, i) => {
+                    const card = document.createElement("div");
+                    card.style = "background:#333; padding:10px; margin:8px 0; border-radius:8px; border-left:4px solid #2ecc71; text-align:left; font-size:13px;";
+                    card.innerHTML = `<strong>Venta #${v.nroVenta}</strong><br>Asientos: ${v.asientos.join(", ")}<br>
+                                     <button id="re-${i}" style="margin-top:5px; background:#2ecc71; border:none; padding:5px 10px; color:white; border-radius:3px; cursor:pointer;">📥 Descargar Todo</button>`;
+                    resDiv.appendChild(card);
+
+                    document.getElementById(`re-${i}`).onclick = async () => {
+                        let nroC = parseInt(v.correlativoBase); // Recuperamos el número original de la columna H
+                        
+                        for (let a of v.asientos) {
+                            let item = a.trim();
+                            if (item.includes("GENERAL")) {
+                                let match = item.match(/\d+/);
+                                let cantG = match ? parseInt(match[0]) : 1;
+                                for (let g = 0; g < cantG; g++) {
+                                    await generarTicket("general.jpg", String(nroC).padStart(5, "0"), "GENERAL");
+                                    nroC++; // Incrementa para cada ticket general recuperado
+                                }
+                            } else {
+                                await generarTicket("vip.jpg", String(nroC).padStart(5, "0"), item);
+                                nroC++; // Incrementa para cada ticket VIP recuperado
+                            }
+                        }
+                    };
+                });
+            } catch (e) { resDiv.innerHTML = "❌ Error en la conexión."; }
         }
 
         function generarTicket(ruta, num, asiento) {
@@ -362,15 +237,11 @@
                     canvas.width = img.width; canvas.height = img.height;
                     const ctx = canvas.getContext("2d");
                     ctx.drawImage(img, 0, 0);
-                    
                     ctx.fillStyle = "white";
                     ctx.font = "bold 42px Arial";
                     ctx.textAlign = "left";
-                    
-                    // Coordenadas para los cuadros rojos de tu imagen
                     ctx.fillText(num, img.width * 0.140, img.height * 0.115);
                     ctx.fillText(num, img.width * 0.865, img.height * 0.115);
-                    
                     ctx.textAlign = "center";
                     if (asiento === "GENERAL") {
                         ctx.font = "bold 55px Arial";
@@ -379,13 +250,13 @@
                         ctx.font = "bold 45px Arial";
                         ctx.fillText("ASIENTO: " + asiento, img.width * 0.872, img.height * 0.285);
                     }
-                    
                     const link = document.createElement("a");
-                    link.download = `Ticket_${num}.png`;
+                    link.download = `Ticket_${num}_${asiento}.png`;
                     link.href = canvas.toDataURL();
                     link.click();
-                    setTimeout(resolve, 600);
+                    setTimeout(resolve, 800); // Pausa para evitar bloqueo de descargas múltiples
                 };
+                img.onerror = () => { console.error("Error imagen: " + ruta); resolve(); };
             });
         }
 
