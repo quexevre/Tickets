@@ -14,17 +14,20 @@
         .escenario { grid-column: 2 / 17; background: #444; padding: 10px 0; border-radius: 8px; font-weight: bold; font-size: 14px; letter-spacing: 2px; border-bottom: 3px solid #2ecc71; }
         .fila { margin: 4px 0; align-items: center; }
         .letra { font-weight: bold; text-align: center; color: #888; font-size: 12px; }
-        .asiento { width: 32px; height: 32px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; cursor: pointer; }
+        .asiento { width: 32px; height: 32px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .vip { background: gold; color: black; }
         .seleccionado { background: #ff4757 !important; color: white !important; box-shadow: 0 0 10px #ff4757; }
         .ocupado { background: #333 !important; color: #555 !important; cursor: not-allowed; }
         .general-panel { width: 90%; max-width: 280px; background: #2ecc71; margin: 20px auto; padding: 15px; border-radius: 12px; display: flex; align-items: center; justify-content: space-around; color: black; font-weight: bold; font-size: 22px; }
-        .btn-qty { width: 45px; height: 45px; font-size: 24px; cursor: pointer; border: none; border-radius: 50%; background: white; }
+        .btn-qty { width: 45px; height: 45px; font-size: 24px; cursor: pointer; border: none; border-radius: 50%; background: white; font-weight: bold; }
         .btn-confirmar { width: 90%; max-width: 350px; padding: 15px; font-size: 18px; font-weight: bold; background: #2ecc71; color: white; border: none; border-radius: 50px; margin: 20px 0; cursor: pointer; }
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); }
         .modal-content { background: #222; margin: 15% auto; padding: 25px; border: 1px solid #2ecc71; width: 85%; max-width: 320px; border-radius: 15px; text-align: left; }
-        .modal-content input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 5px; border: 1px solid #444; background: #333; color: white; box-sizing: border-box; }
-        .btn-reg { width: 100%; padding: 12px; background: #2ecc71; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .modal-content input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 5px; border: 1px solid #444; background: #333; color: white; box-sizing: border-box; font-size: 16px; }
+        .btn-reg { width: 100%; padding: 12px; background: #2ecc71; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        .seccion-recuperar { margin: 50px auto 30px auto; padding: 20px; border-top: 1px solid #333; background: #1a1a1a; max-width: 500px; border-radius: 15px; }
+        .input-busqueda { padding: 10px; border-radius: 5px; border: 1px solid #2ecc71; background: #000; color: white; width: 180px; text-align: center; font-size: 16px; }
+        .ticket-card { background:#333; padding:15px; margin:10px 0; border-radius:8px; border-left:4px solid #2ecc71; text-align:left; font-size:13px; }
     </style>
 </head>
 <body>
@@ -42,8 +45,9 @@
                 <div></div>
                 <div class="escenario">ESCENARIO</div>
             </div>
-            <div id="mapaVIP">Sincronizando sistema...</div>
+            <div id="mapaVIP">Sincronizando datos...</div>
         </div>
+        <p style="font-size: 11px; color: #666;">← Desliza lateralmente para ver todos los asientos →</p>
     </div>
 
     <div id="contenedorGeneral" style="display:none;">
@@ -52,23 +56,33 @@
             <span id="contadorGeneral">0</span>
             <button class="btn-qty" onclick="modificarGeneral(1)">+</button>
         </div>
+        <p>Entradas Generales seleccionadas</p>
     </div>
 
     <button id="btnFinalizar" class="btn-confirmar" onclick="abrirRegistro()">Confirmar y Descargar</button>
 
     <div id="modalRegistro" class="modal">
         <div class="modal-content">
-            <h3 style="color:#2ecc71; text-align:center;">Datos del Cliente</h3>
+            <h3 style="color:#2ecc71; text-align:center; margin-top:0;">Registro de Venta</h3>
             <input type="text" id="cNombre" placeholder="Nombre completo">
             <input type="text" id="cDNI" placeholder="DNI" inputmode="numeric">
             <input type="text" id="cCel" placeholder="Celular" inputmode="tel">
-            <button id="btnEjecutar" class="btn-reg" onclick="validarYProcesar()">FINALIZAR VENTA</button>
+            <button id="btnEjecutar" class="btn-reg" onclick="validarYProcesar()">Finalizar Venta</button>
             <button class="btn-reg" style="background:#555; margin-top:8px;" onclick="cerrarRegistro()">Cancelar</button>
         </div>
     </div>
 
+    <div class="seccion-recuperar">
+        <h3 style="color:#2ecc71; margin-top:0;">🔍 Recuperar Tickets</h3>
+        <div style="display:flex; justify-content:center; gap:8px;">
+            <input type="text" id="dniBusqueda" class="input-busqueda" placeholder="Ingresa DNI">
+            <button onclick="buscarYReimprimir()" style="padding:10px 15px; background:#2ecc71; color:white; border:none; border-radius:5px; font-weight:bold; cursor:pointer;">Buscar</button>
+        </div>
+        <div id="resultadoBusqueda"></div>
+    </div>
+
     <script>
-        // PEGA TU URL DE GOOGLE AQUÍ
+        // --- CONFIGURACIÓN ---
         const URL_APP = "https://script.google.com/macros/s/AKfycbzO_-ll5SSczfl0GczbqRykfN6kgvYeSosiZqIFUrUHm9S2Fda6hD6cnk8a-Ug-fVAY/exec"; 
         
         const filasVIP = ["A", "B", "C", "D", "E", "F", "G"];
@@ -76,20 +90,28 @@
         let asientosOcupados = [];
         let correlativoProximo = 1;
 
+        // --- PUNTO 1: LIMPIEZA AUTOMÁTICA DEL BUSCADOR ---
+        document.getElementById("dniBusqueda").addEventListener("input", function() {
+            if (this.value.trim() === "") {
+                document.getElementById("resultadoBusqueda").innerHTML = "";
+            }
+        });
+
         async function cargarDatos() {
             try {
-                const v = "?t=" + Date.now();
-                // 1. Obtener correlativo
-                const resC = await fetch(URL_APP + v + "&getCorrelativo=true");
+                const cb = "?t=" + Date.now();
+                const resC = await fetch(URL_APP + "?getCorrelativo=true" + cb);
                 correlativoProximo = parseInt(await resC.text()) || 1;
-                // 2. Obtener ocupados
-                const resM = await fetch(URL_APP + v);
+                const resM = await fetch(URL_APP + cb);
                 asientosOcupados = await resM.json();
-                dibujarMapa();
-            } catch (e) { console.error(e); }
+                crearMapa();
+            } catch (e) { 
+                console.error(e);
+                document.getElementById("mapaVIP").innerText = "Error de conexión con Google Sheets."; 
+            }
         }
 
-        function dibujarMapa() {
+        function crearMapa() {
             const mapa = document.getElementById("mapaVIP");
             mapa.innerHTML = "";
             filasVIP.forEach(fila => {
@@ -98,27 +120,30 @@
                 const letra = document.createElement("div");
                 letra.className = "letra"; letra.innerText = fila;
                 filaDiv.appendChild(letra);
-
                 let cantidad = (fila === "A" || fila === "B" || fila === "C") ? 13 : 14;
                 if (cantidad === 13) filaDiv.appendChild(document.createElement("div"));
-
                 for (let i = cantidad; i >= 1; i--) {
                     const id = `${fila}-${i}`;
-                    const div = document.createElement("div");
-                    const ocupado = asientosOcupados.includes(id);
-                    div.className = "asiento vip" + (ocupado ? " ocupado" : "");
-                    div.innerText = i;
-                    if (!ocupado) {
-                        div.onclick = () => {
-                            div.classList.toggle("seleccionado");
-                            if (pedido.vip.includes(id)) pedido.vip = pedido.vip.filter(a => a !== id);
-                            else pedido.vip.push(id);
-                        };
-                    }
-                    filaDiv.appendChild(div);
+                    const asiento = document.createElement("div");
+                    const estaOcupado = asientosOcupados.includes(id);
+                    asiento.className = "asiento vip" + (estaOcupado ? " ocupado" : "");
+                    asiento.innerText = i;
+                    if (!estaOcupado) asiento.onclick = () => toggleAsiento(id, asiento);
+                    filaDiv.appendChild(asiento);
                 }
                 mapa.appendChild(filaDiv);
             });
+        }
+
+        function toggleAsiento(id, el) {
+            const idx = pedido.vip.indexOf(id);
+            if (idx > -1) {
+                pedido.vip.splice(idx, 1);
+                el.classList.remove("seleccionado");
+            } else {
+                pedido.vip.push(id);
+                el.classList.add("seleccionado");
+            }
         }
 
         function modificarGeneral(v) {
@@ -133,7 +158,7 @@
         }
 
         function abrirRegistro() {
-            if (pedido.vip.length + pedido.general === 0) return alert("Selecciona entradas");
+            if (pedido.vip.length + pedido.general === 0) return alert("Por favor, selecciona al menos una entrada.");
             document.getElementById("modalRegistro").style.display = "block";
         }
 
@@ -143,10 +168,20 @@
             const nom = document.getElementById("cNombre").value.trim();
             const dni = document.getElementById("cDNI").value.trim();
             const cel = document.getElementById("cCel").value.trim();
-            if (!nom || !dni) return alert("Faltan datos");
+            if (!nom || !dni || !cel) return alert("Por favor, completa todos los campos del cliente.");
 
-            const btn = document.getElementById("btnEjecutar");
-            btn.disabled = true; btn.innerText = "REGISTRANDO...";
+            document.getElementById("btnEjecutar").disabled = true;
+            document.getElementById("btnEjecutar").innerText = "Procesando...";
+
+            // --- PUNTO 2: DETERMINAR CATEGORÍA EXACTA ---
+            let tipoFinal = "";
+            if (pedido.vip.length > 0 && pedido.general > 0) {
+                tipoFinal = "MIXTA";
+            } else if (pedido.vip.length > 0) {
+                tipoFinal = "VIP";
+            } else {
+                tipoFinal = "GENERAL";
+            }
 
             const total = pedido.vip.length + pedido.general;
             const inicio = correlativoProximo;
@@ -157,16 +192,16 @@
             formData.append('nombre', nom);
             formData.append('dni', dni);
             formData.append('celular', cel);
-            formData.append('asientos', [...pedido.vip, ...(pedido.general > 0 ? ["GENERAL ("+pedido.general+")"] : [])].join(", "));
-            formData.append('tipo', total > 1 ? "MIXTA" : "SIMPLE");
+            formData.append('asientos', [...pedido.vip, ...(pedido.general > 0 ? ["GENERAL (" + pedido.general + ")"] : [])].join(", "));
+            formData.append('tipo', tipoFinal); // Envía MIXTA, VIP o GENERAL
             formData.append('correlativoInicio', inicio);
             formData.append('correlativoFin', fin);
 
             try {
-                // GUARDAR EN EXCEL
+                // Envío a Google Sheets
                 await fetch(URL_APP, { method: "POST", mode: "no-cors", body: formData });
-
-                // GENERAR IMÁGENES
+                
+                // Generación de Tickets
                 let curr = inicio;
                 for (let a of pedido.vip) {
                     await generarTicket("vip.jpg", String(curr).padStart(5, "0"), a);
@@ -177,16 +212,60 @@
                     curr++;
                 }
 
-                alert("✅ Venta exitosa. Tickets: " + inicio + " al " + fin);
+                alert("Venta registrada con éxito como: " + tipoFinal);
                 location.reload();
-            } catch (e) {
-                alert("Error de red");
-                btn.disabled = false;
+            } catch (e) { 
+                alert("Error de red al conectar con el servidor."); 
+                document.getElementById("btnEjecutar").disabled = false;
+                document.getElementById("btnEjecutar").innerText = "Finalizar Venta";
             }
         }
 
+        async function buscarYReimprimir() {
+            const dni = document.getElementById("dniBusqueda").value.trim();
+            const resDiv = document.getElementById("resultadoBusqueda");
+            if (!dni) return alert("Ingresa un DNI para buscar.");
+            resDiv.innerHTML = "⏳ Buscando registros...";
+            try {
+                const res = await fetch(`${URL_APP}?dni=${dni}&t=${Date.now()}`);
+                const ventas = await res.json();
+                if (ventas.length === 0) { resDiv.innerHTML = "❌ No se encontraron compras para este DNI."; return; }
+                resDiv.innerHTML = "";
+                ventas.forEach(v => {
+                    const card = document.createElement("div");
+                    card.className = "ticket-card";
+                    card.innerHTML = `
+                        <strong>Venta #${v.nroVenta} - Zona: ${v.tipo}</strong><br>
+                        Cliente: ${v.nombre}<br>
+                        Entradas: ${v.asientos}<br>
+                        <button onclick="reimprimir('${v.asientos}', ${v.inicio})" style="background:#2ecc71; border:none; padding:8px 12px; color:white; border-radius:5px; cursor:pointer; margin-top:10px; font-weight:bold;">📥 Descargar Tickets</button>
+                    `;
+                    resDiv.appendChild(card);
+                });
+            } catch (e) { resDiv.innerHTML = "❌ Error al conectar con la base de datos."; }
+        }
+
+        async function reimprimir(asientos, inicio) {
+            const lista = asientos.split(",");
+            let actual = parseInt(inicio);
+            for (let a of lista) {
+                let n = a.trim();
+                if (n.includes("GENERAL")) {
+                    let cant = n.match(/\d+/) ? parseInt(n.match(/\d+/)[0]) : 1;
+                    for (let i = 0; i < cant; i++) {
+                        await generarTicket("general.jpg", String(actual).padStart(5, "0"), "GENERAL");
+                        actual++;
+                    }
+                } else {
+                    await generarTicket("vip.jpg", String(actual).padStart(5, "0"), n);
+                    actual++;
+                }
+            }
+            alert("Descarga completa.");
+        }
+
         function generarTicket(ruta, num, asiento) {
-            return new Promise((res) => {
+            return new Promise((resolve) => {
                 const img = new Image();
                 img.src = ruta;
                 img.onload = () => {
@@ -196,21 +275,19 @@
                     ctx.drawImage(img, 0, 0);
                     ctx.fillStyle = "white";
                     ctx.font = "bold 42px Arial";
-                    ctx.fillText(num, img.width * 0.14, img.height * 0.115);
-                    ctx.fillText(num, img.width * 0.86, img.height * 0.115);
+                    ctx.fillText(num, img.width * 0.140, img.height * 0.115);
+                    ctx.fillText(num, img.width * 0.865, img.height * 0.115);
                     ctx.textAlign = "center";
                     ctx.font = "bold 45px Arial";
-                    ctx.fillText(asiento === "GENERAL" ? "GENERAL" : "ASIENTO: " + asiento, img.width * 0.87, img.height * 0.285);
+                    ctx.fillText(asiento === "GENERAL" ? "GENERAL" : "ASIENTO: " + asiento, img.width * 0.872, img.height * 0.285);
                     const link = document.createElement("a");
                     link.download = `Ticket_${num}.png`;
                     link.href = canvas.toDataURL();
                     link.click();
-                    setTimeout(res, 800);
+                    setTimeout(resolve, 600);
                 };
-                img.onerror = res;
             });
         }
-
         cargarDatos();
     </script>
 </body>
