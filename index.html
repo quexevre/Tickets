@@ -11,17 +11,14 @@
         
         .selector-tipo, .selector-obra { background: #333; color: white; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #555; font-size: 16px; width: 95%; max-width: 400px; cursor: pointer; }
         
-        /* ESTRUCTURA ORIGINAL DEL MAPA - NO TOCAR */
+        /* MAPA VIP */
         .mapa-scroll { width: 100%; overflow-x: auto; padding-bottom: 20px; -webkit-overflow-scrolling: touch; }
         .grid-base { display: grid; grid-template-columns: 30px repeat(7, 35px) 50px repeat(7, 35px); justify-content: center; gap: 3px; min-width: 580px; }
-        
         .escenario-container { margin: 20px 0 10px 0; }
         .escenario { grid-column: 2 / 17; background: #444; padding: 10px 0; border-radius: 8px; font-weight: bold; font-size: 14px; letter-spacing: 2px; border-bottom: 3px solid #2ecc71; }
-        
         .fila { margin: 4px 0; align-items: center; }
         .letra { font-weight: bold; text-align: center; color: #888; font-size: 12px; }
         .asiento { width: 32px; height: 32px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        
         .vip { background: gold; color: black; }
         .seleccionado { background: #ff4757 !important; color: white !important; box-shadow: 0 0 10px #ff4757; }
         .ocupado { background: #333 !important; color: #555 !important; cursor: not-allowed; }
@@ -29,7 +26,6 @@
         /* PANEL GENERAL */
         .general-panel { width: 90%; max-width: 280px; background: #2ecc71; margin: 20px auto; padding: 15px; border-radius: 12px; display: flex; align-items: center; justify-content: space-around; color: black; font-weight: bold; font-size: 22px; }
         .btn-qty { width: 45px; height: 45px; font-size: 24px; cursor: pointer; border: none; border-radius: 50%; background: white; font-weight: bold; }
-        
         .btn-confirmar { width: 90%; max-width: 350px; padding: 15px; font-size: 18px; font-weight: bold; background: #2ecc71; color: white; border: none; border-radius: 50px; margin: 20px 0; cursor: pointer; }
         
         /* MODAL */
@@ -38,9 +34,11 @@
         .modal-content input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 5px; border: 1px solid #444; background: #333; color: white; box-sizing: border-box; font-size: 16px; }
         .btn-reg { width: 100%; padding: 12px; background: #2ecc71; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         
+        /* RECUPERAR TICKETS */
         .seccion-recuperar { margin: 50px auto 30px auto; padding: 20px; border-top: 1px solid #333; background: #1a1a1a; max-width: 500px; border-radius: 15px; }
         .input-busqueda { padding: 10px; border-radius: 5px; border: 1px solid #2ecc71; background: #000; color: white; width: 150px; text-align: center; font-size: 16px; }
         .ticket-card { background:#333; padding:15px; margin:10px 0; border-radius:8px; border-left:4px solid #2ecc71; text-align:left; font-size:13px; }
+        .msg-status { color: #2ecc71; font-weight: bold; margin-top: 10px; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -96,7 +94,7 @@
     <div class="seccion-recuperar">
         <h3 style="color:#2ecc71; margin-top:0;">🔍 Recuperar Tickets</h3>
         <div style="display:flex; justify-content:center; gap:8px;">
-            <input type="text" id="dniBusqueda" class="input-busqueda" placeholder="DNI">
+            <input type="text" id="dniBusqueda" class="input-busqueda" placeholder="DNI" oninput="limpiarSiVacio(this)">
             <button onclick="buscarYReimprimir()" style="padding:10px 15px; background:#2ecc71; color:white; border:none; border-radius:5px; font-weight:bold; cursor:pointer;">Buscar</button>
         </div>
         <div id="resultadoBusqueda"></div>
@@ -117,7 +115,7 @@
                 inventarioGlobal = await res.json();
                 cambiarObra();
             } catch (e) {
-                mapa.innerText = "Error: Revisa la conexión con Google.";
+                mapa.innerText = "Error: Verifica la conexión.";
             }
         }
 
@@ -125,33 +123,27 @@
             const obra = document.getElementById("obraActiva").value;
             pedido = { vip: [], general: 0 };
             document.getElementById("contadorGeneral").innerText = "0";
-            
             if (inventarioGlobal[obra]) {
                 asientosOcupados = inventarioGlobal[obra].ocupados;
                 correlativoProximo = inventarioGlobal[obra].proximo;
                 crearMapa();
             } else {
-                document.getElementById("mapaVIP").innerText = "Obra no configurada en el Script.";
+                document.getElementById("mapaVIP").innerText = "Obra no configurada.";
             }
         }
 
-        // MAPA ORIGINAL RESTAURADO
         function crearMapa() {
             const mapa = document.getElementById("mapaVIP");
             mapa.innerHTML = "";
             const filasVIP = ["A", "B", "C", "D", "E", "F", "G"];
-
             filasVIP.forEach(fila => {
                 const filaDiv = document.createElement("div");
                 filaDiv.className = "fila grid-base";
-                
                 const letra = document.createElement("div");
                 letra.className = "letra"; letra.innerText = fila;
                 filaDiv.appendChild(letra);
-
                 let cantidad = (["A", "B", "C"].includes(fila)) ? 13 : 14;
                 if (cantidad === 13) filaDiv.appendChild(document.createElement("div"));
-
                 for (let i = cantidad; i >= 1; i--) {
                     const id = `${fila}-${i}`;
                     const asiento = document.createElement("div");
@@ -186,7 +178,6 @@
             if (pedido.vip.length + pedido.general === 0) return alert("Selecciona entradas.");
             document.getElementById("modalRegistro").style.display = "block"; 
         }
-        
         function cerrarRegistro() { document.getElementById("modalRegistro").style.display = "none"; }
 
         async function validarYProcesar() {
@@ -217,21 +208,13 @@
 
             try {
                 await fetch(URL_APP, { method: "POST", mode: "no-cors", body: formData });
-                
                 let curr = inicio;
-                for (let a of pedido.vip) {
-                    await generarTicket(obra, "vip", String(curr).padStart(5, "0"), a);
-                    curr++;
-                }
-                for (let i = 0; i < pedido.general; i++) {
-                    await generarTicket(obra, "general", String(curr).padStart(5, "0"), "GENERAL");
-                    curr++;
-                }
-
+                for (let a of pedido.vip) { await generarTicket(obra, "vip", String(curr).padStart(5, "0"), a); curr++; }
+                for (let i = 0; i < pedido.general; i++) { await generarTicket(obra, "general", String(curr).padStart(5, "0"), "GENERAL"); curr++; }
                 alert("¡Venta Realizada con éxito!");
                 location.reload();
             } catch (e) { 
-                alert("Error al guardar en Google Sheets.");
+                alert("Error al guardar.");
                 btn.disabled = false; btn.innerText = "Finalizar Venta";
             }
         }
@@ -239,7 +222,7 @@
         async function generarTicket(obra, tipo, num, asiento) {
             return new Promise((resolve) => {
                 const img = new Image();
-                img.src = `${obra}_${tipo}.jpg`;
+                img.src = `${obra.trim()}_${tipo.toLowerCase()}.jpg`;
                 img.onload = () => {
                     const canvas = document.createElement("canvas");
                     canvas.width = img.width; canvas.height = img.height;
@@ -253,13 +236,22 @@
                     ctx.font = "bold 45px Arial";
                     ctx.fillText(asiento === "GENERAL" ? "GENERAL" : "ASIENTO: " + asiento, img.width * 0.872, img.height * 0.285);
                     const link = document.createElement("a");
-                    link.download = `Ticket_${obra}_${num}.png`;
-                    link.href = canvas.toDataURL();
+                    link.download = `Ticket_${obra.replace(/ /g, "_")}_${num}.png`;
+                    link.href = canvas.toDataURL("image/png");
                     link.click();
                     setTimeout(resolve, 600);
                 };
-                img.onerror = () => resolve(); 
+                img.onerror = () => {
+                    console.error("No se encontró: " + img.src);
+                    resolve(); 
+                };
             });
+        }
+
+        function limpiarSiVacio(input) {
+            if (input.value.trim() === "") {
+                document.getElementById("resultadoBusqueda").innerHTML = "";
+            }
         }
 
         async function buscarYReimprimir() {
@@ -278,14 +270,17 @@
                     card.innerHTML = `
                         <strong>${v.obra} - #${v.nroVenta}</strong><br>
                         Entradas: ${v.asientos}<br>
-                        <button onclick="reimprimir('${v.obra}', '${v.asientos}', ${v.inicio})" style="background:#2ecc71; border:none; padding:8px; color:white; border-radius:5px; margin-top:10px; cursor:pointer;">Descargar</button>
+                        <button onclick="ejecutarReimpresion('${v.obra}', '${v.asientos}', ${v.inicio})" style="background:#2ecc71; border:none; padding:8px; color:white; border-radius:5px; margin-top:10px; cursor:pointer;">Descargar</button>
                     `;
                     resDiv.appendChild(card);
                 });
-            } catch (e) { resDiv.innerHTML = "Error."; }
+            } catch (e) { resDiv.innerHTML = "Error de búsqueda."; }
         }
 
-        async function reimprimir(obra, asientos, inicio) {
+        async function ejecutarReimpresion(obra, asientos, inicio) {
+            const resDiv = document.getElementById("resultadoBusqueda");
+            resDiv.innerHTML = "<p class='msg-status'>Preparando descarga... Por favor, espera.</p>";
+            
             const lista = asientos.split(",");
             let actual = parseInt(inicio);
             for (let a of lista) {
@@ -301,6 +296,13 @@
                     actual++;
                 }
             }
+            
+            // Limpieza y mensaje final
+            setTimeout(() => {
+                document.getElementById("dniBusqueda").value = "";
+                resDiv.innerHTML = "";
+                alert("Tickets descargados con éxito.");
+            }, 1000);
         }
 
         inicializarSistema();
