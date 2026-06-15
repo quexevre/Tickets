@@ -133,29 +133,93 @@
         }
 
         function crearMapa() {
-            const mapa = document.getElementById("mapaVIP");
-            mapa.innerHTML = "";
-            const filasVIP = ["A", "B", "C", "D", "E", "F", "G"];
-            filasVIP.forEach(fila => {
-                const filaDiv = document.createElement("div");
-                filaDiv.className = "fila grid-base";
-                const letra = document.createElement("div");
-                letra.className = "letra"; letra.innerText = fila;
-                filaDiv.appendChild(letra);
-                let cantidad = (["A", "B", "C"].includes(fila)) ? 13 : 14;
-                if (cantidad === 13) filaDiv.appendChild(document.createElement("div"));
-                for (let i = cantidad; i >= 1; i--) {
-                    const id = `${fila}-${i}`;
-                    const asiento = document.createElement("div");
-                    const estaOcupado = asientosOcupados.includes(id);
-                    asiento.className = "asiento vip" + (estaOcupado ? " ocupado" : "");
-                    asiento.innerText = i;
-                    if (!estaOcupado) asiento.onclick = () => toggleAsiento(id, asiento);
-                    filaDiv.appendChild(asiento);
-                }
-                mapa.appendChild(filaDiv);
-            });
+
+    const mapa = document.getElementById("mapaVIP");
+    mapa.innerHTML = "";
+
+    const filasVIP = ["A","B","C","D","E","F","G"];
+
+    filasVIP.forEach(fila => {
+
+        const filaDiv = document.createElement("div");
+        filaDiv.className = "fila grid-base";
+
+        const letra = document.createElement("div");
+        letra.className = "letra";
+        letra.innerText = fila;
+
+        filaDiv.appendChild(letra);
+
+        const esFila13 = ["A","B","C"].includes(fila);
+
+        // espacio donde estaría el asiento 14
+        if(esFila13){
+            filaDiv.appendChild(document.createElement("div"));
         }
+
+        // BLOQUE IZQUIERDO
+        const bloqueIzquierdo = esFila13
+            ? [13,12,11,10,9,8]
+            : [14,13,12,11,10,9,8];
+
+        bloqueIzquierdo.forEach(numero => {
+
+            const id = `${fila}-${numero}`;
+
+            const asiento = document.createElement("div");
+
+            const estaOcupado =
+                asientosOcupados.includes(id);
+
+            asiento.className =
+                "asiento vip" +
+                (estaOcupado ? " ocupado" : "");
+
+            asiento.innerText = numero;
+
+            if(!estaOcupado){
+                asiento.onclick = () =>
+                    toggleAsiento(id, asiento);
+            }
+
+            filaDiv.appendChild(asiento);
+
+        });
+
+        // PASILLO VACÍO
+        const pasillo = document.createElement("div");
+        filaDiv.appendChild(pasillo);
+
+        // BLOQUE DERECHO
+        [7,6,5,4,3,2,1].forEach(numero => {
+
+            const id = `${fila}-${numero}`;
+
+            const asiento = document.createElement("div");
+
+            const estaOcupado =
+                asientosOcupados.includes(id);
+
+            asiento.className =
+                "asiento vip" +
+                (estaOcupado ? " ocupado" : "");
+
+            asiento.innerText = numero;
+
+            if(!estaOcupado){
+                asiento.onclick = () =>
+                    toggleAsiento(id, asiento);
+            }
+
+            filaDiv.appendChild(asiento);
+
+        });
+
+        mapa.appendChild(filaDiv);
+
+    });
+
+}
 
         function toggleAsiento(id, el) {
             const idx = pedido.vip.indexOf(id);
